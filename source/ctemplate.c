@@ -50,6 +50,7 @@ static char *find_token(char *start, char *end)
 		return NULL;
 
 	strncpy(token, start + 2, len);
+	token[len] = '\0';
 
 	return token;
 }
