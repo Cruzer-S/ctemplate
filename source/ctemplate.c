@@ -58,6 +58,7 @@ static char *replace_holder(CString str, char *start, char *end,
 		   struct cjson_object *json, char *token)
 {
 	size_t start_offset, end_offset;
+	size_t len;
 
 	start_offset = start - cstring_get(str);
 	end_offset = end - cstring_get(str);
@@ -66,13 +67,23 @@ static char *replace_holder(CString str, char *start, char *end,
 		return NULL;
 
 	struct cjson_value *value = cjson_get_by_key(json, token);
-	if (value->type != CJSON_VALUE_TYPE_STRING)
-		return NULL;
+	if (value->type == CJSON_VALUE_TYPE_STRING) {
+		if ( !cstring_insert(str, start_offset, value->s) )
+			return NULL;
 
-	if ( !cstring_insert(str, start_offset, value->s) )
-		return NULL;
+		len = strlen(value->s);
+	} else if (value->type == CJSON_VALUE_TYPE_NUMBER) {
+		char buffer[BUFSIZ];
 
-	return cstring_get(str) + start_offset + strlen(value->s);
+		sprintf(buffer, "%g", value->n);
+
+		if ( !cstring_insert(str, start_offset, buffer) )
+			return NULL;
+
+		len = strlen(buffer);
+	}
+
+	return cstring_get(str) + start_offset + len;
 }
 
 char *ctemplate_render(char *html, struct cjson_object *json)
