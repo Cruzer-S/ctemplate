@@ -104,10 +104,10 @@ char *ctemplate_render(char *html, struct cjson_object *json)
 			continue;
 
 		end = replace_holder(string, start, end, json, token);
-		if ( !end ) {
-			free(token);
+		free(token);
+
+		if ( !end )
 			return NULL;
-		}
 	}
 
 	return cstring_destroy_only(string);
